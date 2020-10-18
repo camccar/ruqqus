@@ -1,0 +1,43 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  reddis:
+    image: redis
+
+# Finish reddis things
+#  reddis:
+#image: redis
+
+
+  ruqqus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    volumes:
+      - ./:/opt
+    depends_on:
+      - postgres
+      - adminer
+    entrypoint: /bin/bash
+    command:  -c "tail -f /dev/null";
+    environment:
+      - "domain='127.0.0.1:8000'" #IBM Cloud Test
+      - "REDIS_URL=redis://redis:6379"
+      - "DATABASE_URL=postgres://postgres:5432/postgres"
+      - "PYTHONPATH=/opt/ruqqus/"
+      - "SESSION_COOKIE_SECURE=false"
